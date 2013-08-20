@@ -42,7 +42,7 @@ def doc(request, api_name=None):
         'api_url': reverse('api_%s_top_level' % api_name, args=[api_name]), 
         'example_url': reverse(                                             
             "tastydocs.views.example_data",                                 
-            kwargs={'resource_name': "__RESOURCE_NAME__"}                   
+            kwargs={'api_name':api_name, 'resource_name': "__RESOURCE_NAME__"}                   
         )                                                                   
     }                                                                       
     return render_to_response(                                              
