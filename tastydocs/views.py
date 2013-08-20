@@ -4,9 +4,9 @@ from django.template import RequestContext
 from django.core.urlresolvers import reverse
 from django.http import HttpResponse
 from django.conf import settings
-
 from chocolate.rest import TastyFactory
 from tastypie.serializers import Serializer
+from tastypie.api import Api
 
 try:
     from south.management.commands import patch_for_test_db_setup
@@ -33,23 +33,34 @@ class test_db(object):
         settings.DATABASES['default'] = dict(self.old_db_config)
 
 
-def doc(request, api):
-    api_name = api.api_name
+def doc(request, api_name=None):                                            
+    if not(Api.get_api_instances().has_key(api_name)):                      
+        raise Http404                                                       
+    api_name = api_name                                                     
+                                                                            
+    view_data = {                                                           
+        'api_url': reverse('api_%s_top_level' % api_name, args=[api_name]), 
+        'example_url': reverse(                                             
+            "tastydocs.views.example_data",                                 
+            kwargs={'resource_name': "__RESOURCE_NAME__"}                   
+        )                                                                   
+    }                                                                       
+    return render_to_response(                                              
+        'tastydocs/doc.html', view_data,                                    
+        context_instance=RequestContext(request))                           
 
-    view_data = {
-        'api_url': reverse('api_%s_top_level' % api_name, args=[api_name]),
-        'example_url': reverse(
-            "tastydocs.views.example_data",
-            kwargs={'resource_name': "__RESOURCE_NAME__"}
-        )
-    }
-    return render_to_response(
-        'tastydocs/doc.html', view_data,
-        context_instance=RequestContext(request))
+def versions(request):
+    view_data = {'api_version_names':Api.get_api_instances().keys()}             
+    return render_to_response(                                                   
+            'tastydocs/api_versions.html',                                       
+            view_data,                                                           
+            context_instance=RequestContext(request))                            
 
-
-def example_data(request, resource_name, api):
-
+ def example_data(request, resource_name, api_name=None):                              
+     api_instances = Api.get_api_instances()
+     if not(api_instances.has_key(api_name)):
+         raise Http404
+     api = api_instances[api_name]
     tastyfactory = TastyFactory(api)
     resource_mockup = tastyfactory[resource_name]
 
