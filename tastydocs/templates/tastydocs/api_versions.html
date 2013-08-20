@@ -1,0 +1,15 @@
+ {% extends "tastydocs/base.html" %}                                                
+                                                                                    
+ {% block content %}                                                                
+     <h1>                                                                           
+         Versions                                                                   
+     </h1>                                                                          
+                                                                                    
+     <ul>                                                                           
+         {% for version_name in api_version_names  %}                               
+             <li><a href="/docs/api/{{ version_name  }}">{{ version_name  }}</a><li>
+         {% endfor  %}                                                              
+     </ul>                                                                          
+                                                                                    
+ {% endblock %}                                                                     
+                                                                                    
